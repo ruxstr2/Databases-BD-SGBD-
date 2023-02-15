@@ -1,0 +1,128 @@
+--13. Secvență folosită la punctul 10:
+CREATE SEQUENCE SEQ_DEPT
+INCREMENT by 1
+START WITH 1
+MAXVALUE 100
+NOCYCLE;
+
+--11
+/*1) Să se afișeze codul, numele și prenumele persoanelor de 
+contact ale cazărilor din locațiile unde au loc tabere organizate 
+de școli din orașe care încep cu litera ”B”, ordonate descrescător 
+după cod.*/
+
+select distinct p.cod_pers_contact, p.nume, p.prenume
+from scoala s,tabara t, cazare c, persoana_de_contact p
+where t.cod_locatie=c.cod_locatie and c.cod_cazare=p.cod_cazare and s.cod_scoala=t.cod_scoala and s.oras_sediu like 'B%'
+order by p.cod_pers_contact desc;
+
+
+/*2) Să se afișeze codul taberei, suma totala de finanțare pentru 
+fiecare tabără cu codul mai mare decât 42 și suma totală pentru 
+taberele 45 și 47.*/
+
+select cod_tabara, nvl(sum(decode(cod_tabara,45,suma)),0) Sum45,
+                   nvl( sum(decode(cod_tabara,47,suma)),0) Sum47,
+                    sum(suma) Total
+from sponsorizeaza group by cod_tabara having cod_tabara>42;
+
+
+/*3) Să se afișeze numele școlilor care organizează 
+tabere în locații unde se află cazări la care lucrează 
+persoane cu prenumele ”Julia”.*/
+
+with tab_j as (select t.cod_tabara
+                from tabara t, cazare c, persoana_de_contact p
+                where t.cod_locatie=c.cod_locatie and p.cod_cazare=c.cod_cazare and upper(p.prenume)='JULIA')              
+select nume_institutie from scoala
+where cod_scoala in(
+select s.cod_scoala from scoala s, tabara t
+where t.cod_scoala=s.cod_scoala and
+cod_tabara in(select cod_tabara from tab_j));
+
+/*4) Să se afișeze sumele donate de sponsori de tip firmă 
+pentru fiecare tabără în parte, precum și suma totală alocată 
+fiecărei tabere de toți sponsorii care au contribuit.*/
+
+SELECT cod_tabara, (SELECT SUM(suma)
+ FROM sponsorizeaza ss, sponsor sp, tabara t
+ WHERE ss.cod_tabara = 41 and ss.cod_tabara =s.cod_tabara and sp.cod_sponsor=ss.cod_sponsor and sp.tip='firma' and 
+ t.cod_tabara=ss.cod_tabara and t.data_inceput>sysdate) T41, 
+ (SELECT SUM(suma)
+ FROM sponsorizeaza ss, sponsor sp, tabara t
+ WHERE ss.cod_tabara = 42 and ss.cod_tabara =s.cod_tabara and sp.cod_sponsor=ss.cod_sponsor and sp.tip='firma' and 
+ t.cod_tabara=ss.cod_tabara and t.data_inceput>sysdate) T42,
+ (SELECT SUM(suma)
+ FROM sponsorizeaza ss, sponsor sp, tabara t
+ WHERE ss.cod_tabara = 43 and ss.cod_tabara =s.cod_tabara and sp.cod_sponsor=ss.cod_sponsor and sp.tip='firma' and 
+ t.cod_tabara=ss.cod_tabara and t.data_inceput>sysdate) T43,
+(SELECT SUM(suma)
+ FROM sponsorizeaza ss, sponsor sp, tabara t
+ WHERE ss.cod_tabara = 45 and ss.cod_tabara =s.cod_tabara and sp.cod_sponsor=ss.cod_sponsor and sp.tip='firma' and 
+ t.cod_tabara=ss.cod_tabara and t.data_inceput>sysdate) T45,
+ (SELECT SUM(suma)
+ FROM sponsorizeaza ss, sponsor sp, tabara t
+ WHERE ss.cod_tabara = 46 and ss.cod_tabara =s.cod_tabara and sp.cod_sponsor=ss.cod_sponsor and sp.tip='firma' and 
+ t.cod_tabara=ss.cod_tabara and t.data_inceput>sysdate) T46,
+ (SELECT SUM(suma)
+ FROM sponsorizeaza ss, sponsor sp, tabara t
+ WHERE ss.cod_tabara = 47 and ss.cod_tabara =s.cod_tabara and sp.cod_sponsor=ss.cod_sponsor and sp.tip='firma' and 
+ t.cod_tabara=ss.cod_tabara and t.data_inceput>sysdate) T47,
+ (SELECT SUM(suma)
+ FROM sponsorizeaza ss, sponsor sp, tabara t
+ WHERE ss.cod_tabara = 48 and ss.cod_tabara =s.cod_tabara and sp.cod_sponsor=ss.cod_sponsor and sp.tip='firma' and 
+ t.cod_tabara=ss.cod_tabara and t.data_inceput>sysdate) T48,
+ SUM(suma) Total 
+FROM sponsorizeaza s
+GROUP BY cod_tabara;
+
+
+/*5)  Să se selecteze codul, locatia, data începerii și suma 
+adițională pentru fiecare tabără, suma adițională fiind 2500 
+pentru taberele care încep în maxim o jumătate de lună de la 
+data de 27 mai 2021, respectiv 3000 pentru cele care încep la
+ mai mult de o jumătate de lună, dar la mai puțin de o lună 
+jumătate față de aceeași dată.*/
+
+select cod_tabara, cod_locatie, data_inceput, case round(months_between('27-may-2021',data_inceput))
+                    when 0 then 2500
+                    when -1 then 3000
+                    else 0
+                    end "Suma aditionala"
+from tabara;
+
+
+
+--12
+
+/*1) Să se mărească cu 20% sumele acordate de sponsori 
+pentru taberele organizate de școala cu numărul 5.*/
+
+update sponsorizeaza
+set suma=suma*1.2
+where cod_tabara in (select t.cod_tabara
+                from tabara t
+                where t.cod_scoala=5);
+
+
+/*2) Să se șteargă datele despre persoanele de contact 
+care lucrează la pensiunea „Liliac Alb” și al căror nume de 
+familie începe cu litera „R”.*/
+
+delete from persoana_de_contact
+where nume like 'R%' and cod_cazare in
+    (select c.cod_cazare from cazare c
+    where c.nume='Liliac Alb');
+
+
+/*3) Să se modifice locația taberelor care încep după finalul 
+taberei cu codul 45, astfel încât acestea să aibă loc la Alba Iulia.*/
+
+update tabara
+set cod_locatie=(select l.cod_locatie from locatie l where l.nume='Alba Iulia')
+where data_inceput>(select data_sfarsit from tabara where cod_tabara=45);
+
+
+
+
+
