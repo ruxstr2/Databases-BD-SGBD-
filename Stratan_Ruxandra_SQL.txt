@@ -1,0 +1,1015 @@
+--4
+
+create table SCOALA
+(cod_scoala number(4) constraint pk_scoala primary key,
+nume_institutie varchar2(50) constraint nume_scoala not null,
+oras_sediu varchar2(30),
+email_secretariat varchar2(30),
+unique(email_secretariat)
+);
+
+
+create table SPONSOR
+(cod_sponsor number(4) constraint pk_sponsor primary key,
+tip varchar2(20),
+nume varchar2(30)
+);
+
+
+create table LOCATIE
+(cod_locatie number(4) constraint pk_locatie primary key,
+nume varchar2(30) constraint nume_locatie not null,
+judet varchar2(20)
+);
+
+
+create table TABARA
+(cod_tabara number(4) constraint pk_tabara primary key,
+data_inceput date,
+data_sfarsit date,
+cod_scoala number(4),
+cod_locatie number(4),
+constraint fk_tabara_scoala foreign key(cod_scoala) references scoala(cod_scoala),
+constraint fk_tabara_locatie foreign key(cod_locatie) references locatie(cod_locatie),
+check(data_sfarsit>data_inceput)
+);
+
+
+create table CAZARE
+(cod_cazare number(4),
+cod_locatie number(4) constraint fk_cazare_locatie references locatie(cod_locatie),
+constraint pk_compus_cazare primary key(cod_cazare, cod_locatie),
+tip varchar2(20),
+nume varchar2(30),
+numar_locuri number(4)
+);
+
+alter table cazare add constraint cazare_unica unique(cod_cazare);
+
+create table PERSOANA_DE_CONTACT
+(cod_pers_contact number(4) constraint pk_persoana primary key,
+nume varchar2(20),
+prenume varchar2(20),
+cod_cazare number(4),
+telefon varchar2(20),
+email varchar2(20),
+constraint fk_persoana_cazare foreign key(cod_cazare) references cazare(cod_cazare),
+unique (telefon),
+unique(email)
+);
+
+create table ANGAJAT
+(cod_angajat number(4) constraint pk_angajat primary key,
+nume varchar2(30) not null,
+prenume varchar2(30) not null,
+tip_angajat varchar2(20) not null,
+cod_cazare number(4),
+constraint fk_angajat_cazare foreign key(cod_cazare) references cazare(cod_cazare),
+nr_ani_experienta number(2),
+limba_predata varchar2(20),
+tip_organizator varchar2(20)
+);
+
+
+create table ELEV
+(cod_elev number(4) constraint pk_elev primary key,
+nume varchar2(30),
+prenume varchar2(30),
+varsta number(3),
+vegetarian varchar2(10) default 'nu',
+cod_cazare number(4),
+constraint fk_elev_cazare foreign key(cod_cazare) references cazare(cod_cazare),
+check(varsta>13)
+);
+
+create table CURS
+(cod_curs number(4) constraint pk_curs primary key,
+nr_ore number(2),
+nr_credite number(2)
+);
+
+create table GHID
+(cod_ghid number(4) constraint pk_ghid primary key,
+nume varchar2(20),
+prenume varchar2(20),
+varsta number(3),
+email varchar2(25),
+unique(email),
+telefon varchar2(20),
+unique(telefon)
+);
+
+create table INSTRUCTOR
+(cod_instructor number(4) constraint pk_instructor primary key,
+nume varchar2(20),
+prenume varchar2(20),
+varsta number(3),
+nationalitate varchar2(20),
+email varchar2(25),
+unique(email),
+telefon varchar2(20),
+unique(telefon)
+);
+
+create table ACTIVITATE_EXTRACURRICULARA
+(cod_activitate number(4) constraint pk_activitate primary key,
+durata_ore number(2),
+data_desfasurare date,
+cod_organizator number(4),
+constraint fk_activitate_organizator foreign key(cod_organizator) references angajat(cod_angajat),
+tip_activitate varchar2(20) not null,
+destinatie varchar2(30),
+echipament_special varchar2(30),
+cod_ghid number(4),
+constraint fk_activitate_ghid foreign key(cod_ghid) references ghid(cod_ghid),
+tema varchar2(20),
+cod_instructor number(4),
+constraint fk_activitate_instructor foreign key(cod_instructor) references instructor(cod_instructor),
+nume_artist varchar2(20),
+tip_spectacol varchar2(20)
+);
+
+create table SPONSORIZEAZA
+(cod_sponsor number(4) constraint fk_sponsor references sponsor(cod_sponsor),
+cod_tabara number(4) constraint fk_tabara references tabara(cod_tabara),
+constraint pk_sponsorizeaza_compus primary key(cod_sponsor, cod_tabara),
+suma number(5)
+);
+
+create table CONTRACT_DE_MUNCA
+(cod_tabara number(4) constraint fk_contract_tabara references tabara(cod_tabara),
+cod_angajat number(4) constraint fk_contract_angajat references angajat(cod_angajat),
+constraint pk_contract primary key(cod_tabara, cod_angajat),
+data_inceput date default sysdate,
+data_sfarsit date,
+check(data_sfarsit>data_inceput)
+);
+
+
+create table INSCRIERE
+(cod_elev number(4) constraint fk_inscriere_elev references elev(cod_elev),
+cod_tabara number(4) constraint fk_inscriere_tabara references tabara(cod_tabara),
+constraint pk_inscriere primary key(cod_elev, cod_tabara),
+data_inscriere date default sysdate
+);
+
+create table PREDA
+(cod_profesor number(4) constraint fk_preda_profesor references angajat(cod_angajat),
+cod_curs number(4) constraint fk_preda_curs references curs(cod_curs),
+cod_elev number(4) constraint fk_preda_elev references elev(cod_elev),
+constraint pk_preda primary key(cod_profesor, cod_curs, cod_elev)
+);
+commit;
+
+
+--5
+
+CREATE SEQUENCE SEQ_DEPT
+INCREMENT by 1
+START WITH 1
+MAXVALUE 100
+NOCYCLE;
+
+--SCOALA
+insert into scoala
+values (seq_dept.nextval, 'Brownie School of Higher Education', 'Iasi','browniesftw@gmail.com');
+
+insert into scoala
+values (seq_dept.nextval, 'Colegiul National Cheesecake is Awesome', 'Constanta','cheeeseee@gmail.com');
+
+insert into scoala
+values (seq_dept.nextval, 'Scoala Gimnaziala Biscuiti cu Ciocolata', 'Bucuresti','ciocolataeviata@gmail.com');
+
+insert into scoala
+values (seq_dept.nextval, 'Maple Syrup Waffles College', 'Bucuresti','maple_may_love@yahoo.com');
+
+insert into scoala
+values (seq_dept.nextval, 'Scoala Clatite Brasovene din Banat', 'Timisoara','cclatite@gmail.com');
+
+insert into scoala
+values (seq_dept.nextval, 'Liceul Teoretic Inghetata cu Zmeura', 'Baia Mare','fructe_de_padure@yahoo.com');
+
+--SPONSOR
+insert into sponsor
+values (17, 'firma', 'Acid Dezoxiribonucleic SA');
+
+insert into sponsor
+values (18, 'persoana_fizica', 'Chimiaorg Anica Egrea');
+
+insert into sponsor
+values (19, 'persoana_fizica', 'Reactie von Neutralizare');
+
+insert into sponsor
+values (20, 'firma', 'A.R.E.N.E');
+
+insert into sponsor
+values (21, 'firma', 'C3H8');
+
+insert into sponsor
+values (22, 'firma', 'Catene Ramificate En Gros');
+
+--LOCATIE
+insert into locatie
+values (12, 'Moieciu de Sus', 'Brasov');
+
+insert into locatie
+values (13, 'Sinaia', 'Prahova');
+
+insert into locatie
+values (14, 'Vama Veche', 'Constanta');
+
+insert into locatie
+values (26, 'Viseu de Sus', 'Maramures');
+
+insert into locatie
+values (87, 'Simon', 'Brasov');
+
+insert into locatie
+values (90, 'Alba Iulia', 'Alba Iulia');
+
+--TABARA
+insert into tabara
+values (41, to_date('12-01-2020','dd-mm-yyyy'), to_date('24-01-2020','dd-mm-yyyy'),3,90);
+
+insert into tabara
+values (42, to_date('24-02-2020','dd-mm-yyyy'), to_date('06-03-2020','dd-mm-yyyy'),6,87);
+
+insert into tabara
+values (43, to_date('17-05-2020','dd-mm-yyyy'), to_date('29-05-2020','dd-mm-yyyy'),7,12);
+
+insert into tabara
+values (45, to_date('06-06-2021','dd-mm-yyyy'), to_date('18-06-2021','dd-mm-yyyy'),5,12);
+
+insert into tabara
+values (46, to_date('19-06-2021','dd-mm-yyyy'), to_date('27-06-2021','dd-mm-yyyy'),7,26);
+
+insert into tabara
+values (47, to_date('13-07-2021','dd-mm-yyyy'), to_date('26-07-2021','dd-mm-yyyy'),5,12);
+
+insert into tabara
+values (48, to_date('19-08-2021','dd-mm-yyyy'), to_date('31-08-2021','dd-mm-yyyy'),4,26);
+
+--CAZARE
+insert into cazare
+values (101,12,'pensiune','Nu-ma-uita',24);
+
+insert into cazare
+values (102,13,'hotel','Lalele si Garoafe',45);
+
+insert into cazare
+values (103,14,'hotel','Floarea Soarelui',52);
+
+insert into cazare
+values (104,26,'pensiune','Zambile Albastre',20);
+
+insert into cazare
+values (105,87,'pensiune','Liliac Alb',30);
+
+insert into cazare
+values (106,90,'hotel','Caisi Infloriti',48);
+
+insert into cazare
+values (107,12,'pensiune','Floare de Gheata',30);
+
+--PERSOANA_DE_CONTACT
+insert into persoana_de_contact
+values (11,'Margineanu','Tudor',105,'0738294522','margine@yahoo.com');
+
+insert into persoana_de_contact
+values (12,'Safir','Melisa',102,'0715463420','safir@gmail.com');
+
+insert into persoana_de_contact
+values (13,'Stravedenie','Julia',107,'0735291635','julie@yahoo.com');
+
+insert into persoana_de_contact
+values (14,'Opinie','David',103,'0734529853','ddavid@yahoo.com');
+
+insert into persoana_de_contact
+values (15,'Santimbreanu','Elena',107,'0735280980','selena@gmail.com');
+
+insert into persoana_de_contact
+values (16,'Trandafir','Haralambie',101,'0799845372','fir@yahoo.com');
+
+insert into persoana_de_contact
+values (17,'Gheata','Stefania',104,'0735364763','ice@yahoo.com');
+
+insert into persoana_de_contact
+values (18,'Radu','Tudor',105,'0739026311','radu@yahoo.com');
+
+insert into persoana_de_contact
+values (19,'Urare','Teodor',106,'0737452201','lma@yahoo.com');
+
+--ANGAJAT
+insert into angajat
+values (221,'Roaba','Robert','organizator',101, null, null, 'permanent');
+
+insert into angajat
+values (222,'Axinte','Alexandra','organizator',107, null, null, 'temporar');
+
+insert into angajat
+values (223,'Jalbert','Janine','profesor',107, 12, 'franceza', null);
+
+insert into angajat
+values (224,'Drichert','Desma','profesor',null, 8, 'germana', null);
+
+insert into angajat
+values (225,'Ealsey','Elena','profesor',null, 15, 'engleza', null);
+
+insert into angajat
+values (226,'Zicci','Zara','profesor',101, 6, 'italiana', null);
+
+insert into angajat
+values (227,'Blanc','Blanche','profesor',107, 24, 'franceza', null);
+
+insert into angajat
+values (228,'Hallo','Herbert','profesor',107, 12, 'germana', null);
+
+insert into angajat
+values (229,'Molly','Malone','profesor',null, 10, 'engleza', null);
+
+insert into angajat
+values (230,'Chakra','Chalice','profesor',101, 32, 'spaniola', null);
+
+insert into angajat
+values (231,'Sebaleh','Sebastian','organizator',null, null, null, 'permanent');
+
+insert into angajat
+values (232,'Tauriel','Tara','organizator',null, null, null, 'temporar');
+
+--ELEV
+insert into elev (cod_elev,nume,prenume,varsta,cod_cazare)
+values (995,'Thriller','George',21,101);
+
+insert into elev (cod_elev,nume,prenume,varsta,cod_cazare)
+values (996,'Romance','Tiberiu',18,101);
+
+insert into elev (cod_elev,nume,prenume,varsta,cod_cazare)
+values (997,'Action','Smaranda',15,101);
+
+insert into elev
+values (998,'Drama','Simona',16,'da',107);
+
+insert into elev (cod_elev,nume,prenume,varsta,cod_cazare)
+values (999,'Documentary','Cecil',17,101);
+
+insert into elev
+values (1000,'Scifi','Fifi',14,'da',107);
+
+insert into elev (cod_elev,nume,prenume,varsta,cod_cazare)
+values (1001,'Drama','Xenopol',16,107);
+
+insert into elev (cod_elev,nume,prenume,varsta,cod_cazare)
+values (1002,'Comedy','Miruna',15,101);
+
+insert into elev (cod_elev,nume,prenume,varsta,cod_cazare)
+values (1003,'Fantasy','Luca',25,107);
+
+insert into elev (cod_elev,nume,prenume,varsta,cod_cazare)
+values (1004,'Period-Drama','Crissy',19,107);
+
+insert into elev (cod_elev,nume,prenume,varsta,cod_cazare)
+values (1005,'Adventure','Cosmin',22,101);
+
+--CURS
+insert into curs
+values (56,2,3);
+
+insert into curs
+values (57,4,5);
+
+insert into curs
+values (58,3,4);
+
+insert into curs
+values (59,2,4);
+
+insert into curs
+values (60,1,2);
+
+insert into curs
+values (61,3,5);
+
+insert into curs
+values (62,2,3);
+
+insert into curs
+values (63,2,2);
+
+--GHID
+insert into ghid
+values (141,'Ceahlau','Cecilia',27,'ceahlauc@gmail.com','0734231411');
+
+insert into ghid
+values (142,'Fagaras','Fanica',32,'ffanica@gmail.com','0774565748');
+
+insert into ghid
+values (143,'Apuseni','Apus',36,'apus@yahoo.com','0701927909');
+
+insert into ghid
+values (144,'Retezat','Rica',25,'icarrr@yahoo.com','07345271831');
+
+insert into ghid
+values (145,'Bucegi','Bucur',30,'bucuregi@yahoo.com','0745361991');
+
+insert into ghid
+values (146,'Rarau','Raluca',31,'ralaurar@gmail.com','0722372901');
+
+--INSTRUCTOR
+insert into instructor
+values (161,'Elektroheizung','Tamara',23,'belgiana','elektamara@gmail.com','0744234512');
+
+insert into instructor
+values (162,'Stove','Felix',26,'engleza','felixisonfire@yahoo.com','0790382032');
+
+insert into instructor
+values (163,'Calorifer','Fabrice',31,'turca','ffabrice@gmail.com','0777639465');
+
+insert into instructor
+values (164,'Microunde','Damian',28,'romana','explodeaza@yahoo.com','0736725348');
+
+insert into instructor
+values (165,'Radio','Ana-Maria',29,'romana','radioaa@gmail.com','0700210223');
+
+insert into instructor
+values (166,'Televizor','Marius',32,'romana','mariusdelatv@yahoo.com','0799375463');
+
+--ACTIVITATE
+insert into activitate_extracurriculara
+values (2001,24,to_date('15-07-2021','dd-mm-yyyy'),221,'drumetie','Valea Magarului','da',142,null,null,null,null);
+
+insert into activitate_extracurriculara
+values (2002,48,to_date('10-06-2021','dd-mm-yyyy'),222,'drumetie','Valea Oaselor','da',142,null,null,null,null);
+
+insert into activitate_extracurriculara
+values (2003,2,to_date('14-07-2021','dd-mm-yyyy'),222,'program_artistic',null,null,null,null,null,'Elevii taberei','concurs_talente');
+
+insert into activitate_extracurriculara
+values (2004,1,to_date('12-06-2021','dd-mm-yyyy'),221,'workshop',null,null,null,'antreprenoriat',162,null,null);
+
+insert into activitate_extracurriculara
+values (2005,2,to_date('16-07-2021','dd-mm-yyyy'),222,'program_artistic',null,null,null,null,null,'Iasomie cu Marar','dans');
+
+insert into activitate_extracurriculara
+values (2006,12,to_date('07-06-2021','dd-mm-yyyy'),221,'drumetie','Valea Dinozaurilor','nu',144,null,null,null,null);
+
+insert into activitate_extracurriculara
+values (2007,4,to_date('09-06-2021','dd-mm-yyyy'),221,'workshop',null,null,null,'leadership',164,null,null);
+
+insert into activitate_extracurriculara
+values (2008,4,to_date('21-07-2021','dd-mm-yyyy'),221,'program_artistic',null,null,null,null,null,'Taraf cu Zurgalai','concert');
+
+insert into activitate_extracurriculara
+values (2009,8,to_date('24-07-2021','dd-mm-yyyy'),221,'workshop',null,null,null,'antreprenoriat',161,null,null);
+
+--SPONSORIZEAZA
+insert into sponsorizeaza
+values (17,45,1000);
+
+insert into sponsorizeaza
+values (18,45,2500);
+
+insert into sponsorizeaza
+values (18,41,550);
+
+insert into sponsorizeaza
+values (19,42,1200);
+
+insert into sponsorizeaza
+values (20,47,3000);
+
+insert into sponsorizeaza
+values (21,45,2100);
+
+insert into sponsorizeaza
+values (22,42,2200);
+
+insert into sponsorizeaza
+values (20,46,750);
+
+insert into sponsorizeaza
+values (21,47,850);
+
+insert into sponsorizeaza
+values (18,46,1300);
+
+insert into sponsorizeaza
+values (19,45,1800);
+
+insert into sponsorizeaza
+values (19,48,2000);
+
+--CONTRACT_DE_MUNCA
+insert into contract_de_munca
+values (41,223,to_date('10-jan-2020','dd-mm-yyyy'),to_date('30-jan-2020','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (42,225,to_date('20-feb-2020','dd-mm-yyyy'),to_date('10-mar-2020','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (43,226,to_date('15-may-2020','dd-mm-yyyy'),to_date('30-may-2020','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (45,221,to_date('05-jun-2021','dd-mm-yyyy'),to_date('20-jun-2021','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (46,229,to_date('15-jun-2021','dd-mm-yyyy'),to_date('29-jun-2021','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (47,222,to_date('10-jul-2021','dd-mm-yyyy'),to_date('30-jul-2021','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (48,230,to_date('17-aug-2021','dd-mm-yyyy'),to_date('31-aug-2021','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (45,222,to_date('10-jan-2021','dd-mm-yyyy'),to_date('19-jun-2021','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (45,223,to_date('05-jun-2021','dd-mm-yyyy'),to_date('18-jun-2021','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (45,226,to_date('05-jun-2021','dd-mm-yyyy'),to_date('18-jun-2021','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (45,228,to_date('05-jun-2021','dd-mm-yyyy'),to_date('18-jun-2021','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (47,221,to_date('10-jul-2021','dd-mm-yyyy'),to_date('28-jul-2021','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (47,228,to_date('13-jul-2021','dd-mm-yyyy'),to_date('25-jul-2021','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (47,230,to_date('13-jul-2021','dd-mm-yyyy'),to_date('25-jul-2021','dd-mm-yyyy'));
+
+insert into contract_de_munca
+values (47,227,to_date('13-jul-2021','dd-mm-yyyy'),to_date('25-jul-2021','dd-mm-yyyy'));
+
+--INSCRIERE
+insert into inscriere
+values (995,47,to_date('13-mar-2021','dd-mm-yyyy'));
+
+insert into inscriere
+values (996,47,to_date('24-may-2021','dd-mm-yyyy'));
+
+insert into inscriere
+values (997,45,to_date('25-may-2021','dd-mm-yyyy'));
+
+insert into inscriere
+values (998,47,to_date('15-apr-2021','dd-mm-yyyy'));
+
+insert into inscriere
+values (999,45,to_date('17-may-2021','dd-mm-yyyy'));
+
+insert into inscriere
+values (1000,45,to_date('10-mar-2021','dd-mm-yyyy'));
+
+insert into inscriere
+values (1001,47,to_date('16-apr-2021','dd-mm-yyyy'));
+
+insert into inscriere
+values (1002,45,to_date('12-may-2021','dd-mm-yyyy'));
+
+insert into inscriere
+values (1003,45,to_date('24-may-2021','dd-mm-yyyy'));
+
+insert into inscriere
+values (1003,48,to_date('24-jul-2021','dd-mm-yyyy'));
+
+insert into inscriere
+values (1004,47,to_date('15-apr-2021','dd-mm-yyyy'));
+
+insert into inscriere
+values (1004,42,to_date('20-dec-2019','dd-mm-yyyy'));
+
+insert into inscriere
+values (1005,47,to_date('12-jun-2021','dd-mm-yyyy'));
+
+--PREDA
+insert into preda
+values (223,56,997);
+
+insert into preda
+values (223,56,999);
+
+insert into preda
+values (223,57,997);
+
+insert into preda
+values (223,57,1000);
+
+insert into preda
+values (223,58,1002);
+----
+insert into preda
+values (226,59,999);
+
+insert into preda
+values (226,59,1000);
+
+insert into preda
+values (226,60,1003);
+
+insert into preda
+values (226,61,997);
+
+insert into preda
+values (226,61,999);
+
+insert into preda
+values (226,61,1003);
+---
+insert into preda
+values (227,62,995);
+
+insert into preda
+values (227,62,996);
+
+insert into preda
+values (227,62,998);
+
+insert into preda
+values (227,63,996);
+
+insert into preda
+values (227,63,1001);
+---
+insert into preda
+values (228,60,997);
+
+insert into preda
+values (228,60,999);
+
+insert into preda
+values (228,60,1000);
+
+insert into preda
+values (228,60,1002);
+
+insert into preda
+values (228,62,1003);
+
+insert into preda
+values (228,62,997);
+
+insert into preda
+values (228,62,999);
+
+insert into preda
+values (228,62,1000);
+
+insert into preda
+values (228,63,997);
+---
+insert into preda
+values (228,58,996);
+
+insert into preda
+values (228,58,998);
+
+insert into preda
+values (228,58,1001);
+
+insert into preda
+values (228,60,995);
+
+insert into preda
+values (228,60,998);
+
+insert into preda
+values (228,60,1004);
+
+insert into preda
+values (228,62,1005);
+
+insert into preda
+values (228,61,996);
+----
+insert into preda
+values (230,57,996);
+
+insert into preda
+values (230,57,1004);
+
+insert into preda
+values (230,59,995);
+
+insert into preda
+values (230,59,1001);
+
+insert into preda
+values (230,59,1004);
+
+insert into preda
+values (230,61,998);
+
+commit;
+
+
+--6
+
+alter table sponsorizeaza drop constraint fk_sponsor;
+
+create or replace procedure sponsori
+as
+    type tab_indexat is table of sponsor%rowtype index by binary_integer;
+    t_6_1 tab_indexat;
+    type vec is varray(10) of number;
+    t_6_2 vec:=vec(17,19,21);
+begin
+    delete from sponsor
+    where tip='persoana_fizica'
+    returning cod_sponsor, tip, nume
+    bulk collect into t_6_1;
+    
+    dbms_output.put_line('Au fost stersi ' || t_6_1.count || ' sponsori de tip persoana fizica, respectiv:');
+    for i in t_6_1.first..t_6_1.last loop
+        dbms_output.put_line(t_6_1(i).cod_sponsor || ' ' || t_6_1(i).nume);
+    end loop;
+    
+    rollback;
+    dbms_output.put_line('ROLLBACK');
+    
+    for i in t_6_2.first..t_6_2.last loop
+        delete from sponsor
+        where cod_sponsor=t_6_2(i);
+        dbms_output.put_line('A fost sters sponsorul cu id-ul '|| t_6_2(i));
+    end loop;
+    
+    rollback;
+    dbms_output.put_line('ROLLBACK');
+end;
+/
+
+begin
+    sponsori;
+end;
+/
+
+
+--7
+
+create or replace procedure nr_tabere
+as
+   cursor c_7 is
+    select judet, count(cod_tabara) nr_tabere
+    from tabara t, locatie l
+    where t.cod_locatie=l.cod_locatie
+    group by judet;
+begin
+    for i in c_7 loop
+        if i.nr_tabere=0 then
+        dbms_output.put_line('Nu sunt tabere organizate in judetul ' || i.judet);
+        elsif i.nr_tabere=1 then
+        dbms_output.put_line('In judetul ' || i.judet || ' este organizata o tabara');
+        else
+        dbms_output.put_line('In judetul ' || i.judet || ' sunt organizate ' || i.nr_tabere || ' tabere');
+        end if;
+    end loop;
+end;
+/
+
+begin
+    nr_tabere;
+end;
+/
+
+
+--8
+
+create or replace function f_8
+(cod_l tabara.cod_locatie%type default 90)
+return varchar2 is
+cod_s sponsor.tip%type;
+nr number;
+begin
+  
+    select s.tip into cod_s
+    from sponsor s, sponsorizeaza sp, tabara t
+    where s.cod_sponsor=sp.cod_sponsor and sp.cod_tabara=t.cod_tabara and t.cod_locatie=cod_l;
+    return cod_s;
+    
+    exception
+    when too_many_rows then
+    RAISE_APPLICATION_ERROR(-20003, 'Sunt mai multe tabere in aceasta locatie');
+    when no_data_found then
+    RAISE_APPLICATION_ERROR(-20001, 'Nu exista tabere in aceasta locatie');
+    when others then
+    RAISE_APPLICATION_ERROR(-20002, 'Eroare '|| sqlcode || ' ' || sqlerrm);
+end f_8;
+/
+
+select f_8 from dual;
+select f_8(87) from dual;
+select f_8(33) from dual;
+
+
+--9
+
+create or replace procedure date_contact
+as
+    oras scoala.oras_sediu%type:='&input';
+    telefon_p_c persoana_de_contact.telefon%type;
+    email_p_c persoana_de_contact.email%type;
+begin
+
+    select distinct p.telefon, p.email
+    into telefon_p_c, email_p_c
+    from scoala s,tabara t, cazare c, persoana_de_contact p, locatie l
+    where t.cod_locatie=c.cod_locatie and l.cod_locatie=t.cod_locatie and l.cod_locatie<100 
+    and c.cod_cazare=p.cod_cazare and s.cod_scoala=t.cod_scoala and upper(s.oras_sediu)=upper(oras);
+    
+    dbms_output.put_line(telefon_p_c || ' ' || email_p_c);
+    
+    exception
+    when too_many_rows then
+    dbms_output.put_line('Sunt mai multe persoane de contact disponibile');
+    when no_data_found then
+    dbms_output.put_line('Nu exista persoane de contact disponibile');
+    when others then
+    dbms_output.put_line('Eroare '|| sqlcode || ' ' || sqlerrm);
+
+end;
+/
+
+begin
+    date_contact;
+end;
+/
+
+
+--10
+
+create or replace trigger trigger_10
+before delete on tabara
+begin
+    if (to_char(sysdate,'MM')<>12) then
+    RAISE_APPLICATION_ERROR(-20001, 'Nu se poate actualiza tabelul Tabara decat in luna decembrie');
+    end if;
+end;
+/
+
+delete from tabara where cod_tabara=47;
+drop trigger trigger_10;
+
+
+--11
+
+create or replace trigger trigger_11
+before delete on tabara
+for each row
+begin
+    if :old.data_inceput>to_date('31-DEC-20') then
+    RAISE_APPLICATION_ERROR(-20001, 'Nu se pot sterge taberele care au loc incepand cu 2021');
+    end if;
+end;
+/
+
+delete from tabara where cod_tabara>47;
+drop trigger trigger_11;
+
+
+--12
+
+create table ob_create(
+baza_de_date varchar2(30),
+nume_utilizator varchar2(30),
+tip_obiect varchar2(30),
+nume_obiect varchar2(30),
+data_creare date
+);
+
+create or replace trigger trigger_12
+after create on schema
+begin
+    insert into ob_create
+    values(sys.database_name, sys.login_user, sys.dictionary_obj_type, sys.dictionary_obj_name, sysdate);
+end;
+/
+
+select * from ob_create;
+create table tabel_test(col_test varchar2(15), col_test_2 number(4));
+create or replace trigger trigger_12_2
+after drop on schema
+begin
+    DBMS_OUTPUT.PUT_LINE('You dropped something');
+end;
+/
+
+select * from ob_create;
+drop trigger trigger_12;
+drop trigger trigger_12_2;
+
+
+--13
+
+create or replace package p_13
+as
+function ff_8(cod_l tabara.cod_locatie%type default 90) return varchar2;
+procedure pp_6;
+procedure pp_7;
+procedure pp_9;
+end;
+/
+
+create or replace package body p_13
+as
+procedure pp_6 as
+    type tab_indexat is table of sponsor%rowtype index by binary_integer;
+    t_6_1 tab_indexat;
+    type vec is varray(10) of number;
+    t_6_2 vec:=vec(17,19,21);
+begin
+    delete from sponsor
+    where tip='persoana_fizica'
+    returning cod_sponsor, tip, nume
+    bulk collect into t_6_1;
+    
+    dbms_output.put_line('Au fost stersi ' || t_6_1.count || ' sponsori de tip persoana fizica, respectiv:');
+    for i in t_6_1.first..t_6_1.last loop
+        dbms_output.put_line(t_6_1(i).cod_sponsor || ' ' || t_6_1(i).nume);
+    end loop;
+    
+    rollback;
+    dbms_output.put_line('ROLLBACK');
+    
+    for i in t_6_2.first..t_6_2.last loop
+        delete from sponsor
+        where cod_sponsor=t_6_2(i);
+        dbms_output.put_line('A fost sters sponsorul cu id-ul '|| t_6_2(i));
+    end loop;
+    
+    rollback;
+    dbms_output.put_line('ROLLBACK');
+
+end pp_6;
+
+procedure pp_7 as
+   cursor c_7 is
+    select judet, count(cod_tabara) nr_tabere
+    from tabara t, locatie l
+    where t.cod_locatie=l.cod_locatie
+    group by judet;
+begin
+    for i in c_7 loop
+        if i.nr_tabere=0 then
+        dbms_output.put_line('Nu sunt tabere organizate in judetul ' || i.judet);
+        elsif i.nr_tabere=1 then
+        dbms_output.put_line('In judetul ' || i.judet || ' este organizata o tabara');
+        else
+        dbms_output.put_line('In judetul ' || i.judet || ' sunt organizate ' || i.nr_tabere || ' tabere');
+        end if;
+    end loop;
+
+end pp_7;
+
+procedure pp_9 as
+    oras scoala.oras_sediu%type:='&input';
+    telefon_p_c persoana_de_contact.telefon%type;
+    email_p_c persoana_de_contact.email%type;
+begin
+
+    select distinct p.telefon, p.email
+    into telefon_p_c, email_p_c
+    from scoala s,tabara t, cazare c, persoana_de_contact p, locatie l
+    where t.cod_locatie=c.cod_locatie and l.cod_locatie=t.cod_locatie and l.cod_locatie<100 
+    and c.cod_cazare=p.cod_cazare and s.cod_scoala=t.cod_scoala and upper(s.oras_sediu)=upper(oras);
+    
+    dbms_output.put_line(telefon_p_c || ' ' || email_p_c);
+    
+    exception
+    when too_many_rows then
+    dbms_output.put_line('Sunt mai multe persoane de contact disponibile');
+    when no_data_found then
+    dbms_output.put_line('Nu exista persoane de contact disponibile');
+    when others then
+    dbms_output.put_line('Eroare '|| sqlcode || ' ' || sqlerrm);
+
+end pp_9;
+
+function ff_8
+(cod_l tabara.cod_locatie%type default 90)
+return varchar2 is
+cod_s sponsor.tip%type;
+nr number;
+begin
+  
+    select s.tip into cod_s
+    from sponsor s, sponsorizeaza sp, tabara t
+    where s.cod_sponsor=sp.cod_sponsor and sp.cod_tabara=t.cod_tabara and t.cod_locatie=cod_l;
+    return cod_s;
+    
+    exception
+    when too_many_rows then
+    RAISE_APPLICATION_ERROR(-20003, 'Sunt mai multe tabere in aceasta locatie');
+    when no_data_found then
+    RAISE_APPLICATION_ERROR(-20001, 'Nu exista tabere in aceasta locatie');
+    when others then
+    RAISE_APPLICATION_ERROR(-20002, 'Eroare '|| sqlcode || ' ' || sqlerrm);
+end ff_8;
+end p_13;
+/
+
+select p_13.ff_8 from dual;
+execute p_13.pp_6;
+execute p_13.pp_7;
+execute p_13.pp_9;
